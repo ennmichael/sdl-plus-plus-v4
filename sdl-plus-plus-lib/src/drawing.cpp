@@ -175,7 +175,7 @@ std::ostream& operator<<(std::ostream& os, Line l)
     return os << '{' << l.from << ", " << '}';
 }
 
-Texture Texture::create_from_raw_surface(
+Texture Texture::from_raw_surface(
     SDL_Renderer& renderer,
     SDL_Surface& surface) 
 {
@@ -205,11 +205,6 @@ Texture::Texture(SDL_Renderer& renderer, SDL_Surface& surface)
     internal::error_checking::check_pointer(texture_ptr_);
 }
 
-void Texture::Deleter::operator()(SDL_Texture* texture) noexcept 
-{
-    SDL_DestroyTexture(texture);
-}
-
 Surface::Surface(const Filename& filename)
     : surface_ptr_(IMG_Load(filename.c_str())) 
 {
@@ -223,7 +218,7 @@ Surface Surface::load_from_file(const Filename& s)
 
 Texture Surface::get_texture_from_raw_renderer(SDL_Renderer& renderer) 
 {
-    return Texture::create_from_raw_surface(renderer, *surface_ptr_);
+    return Texture::from_raw_surface(renderer, *surface_ptr_);
 }
 
 Rectangle Texture::create_source_rectangle() const noexcept 
@@ -234,11 +229,6 @@ Rectangle Texture::create_source_rectangle() const noexcept
 Rectangle Texture::create_destination_rectangle(Point position) const noexcept 
 {
     return {position.x, position.y, size().width, size().height};
-}
-
-void Surface::Deleter::operator()(SDL_Surface* surface) noexcept 
-{
-    SDL_FreeSurface(surface);
 }
 
 Renderer::Renderer(SDL_Window& window)
@@ -322,12 +312,13 @@ Color Renderer::get_draw_color() const
     return result;
 }
 
-void Renderer::Deleter::operator()(SDL_Renderer* renderer) noexcept 
+const char* Image_cache::Getting_uncached_image::what() const noexcept
 {
-    SDL_DestroyRenderer(renderer);
+    return "Image_cache::get_image_texture called for a file not yet cahced."
+           "Call Image_cache::cache_image first.";
 }
 
-void Image_cache::load_image(
+void Image_cache::cache_image(
     const Filename& filename,
     Sdl::Renderer& renderer)
 {
@@ -335,22 +326,23 @@ void Image_cache::load_image(
         std::make_pair(filename, renderer.load_texture(filename)));
 }
 
-bool Image_cache::image_loaded(const Filename& filename) const noexcept 
+bool Image_cache::image_is_cached(const Filename& filename) const noexcept 
 {
     return textures_.count(filename) == 1;
 }
 
-Texture& Image_cache::get_image_texture(const Filename& filename) 
+Texture& Image_cache::image_texture(const Filename& filename) 
 {
-    return get_image_texture_fallback(*this, filename);
+    return get_image_texture_impl(*this, filename);
 }
 
-const Texture& Image_cache::get_image_texture(const Filename& filename) const 
+const Texture& Image_cache::image_texture(const Filename& filename) const 
 {
-    return get_image_texture_fallback(*this, filename);
+    return get_image_texture_impl(*this, filename);
 }
 
-Window_properties Window_properties::default_values() {
+Window_properties Window_properties::default_values() 
+{
     Window_properties properties;
     properties.size.width = 800;
     properties.size.height = 600;
@@ -359,77 +351,11 @@ Window_properties Window_properties::default_values() {
 }
 
 Window_properties Window_properties::default_values_with_title(
-    std::string title) {
+    std::string title) 
+{
     auto properties = Window_properties::default_values();
     properties.title = std::move(title);
     return properties;
-}
-
-class Draw_commands::Image_draw_command : public Draw_command {
-   public:
-    Image_draw_command(Texture& texture, Sdl::Point position)
-        : texture_(texture), position_(position) {}
-
-    void execute(Renderer& renderer) const override {
-        renderer.draw_texture(texture_, position_);
-    }
-
-   private:
-    Texture& texture_;
-    Point position_;
-};
-
-class Draw_commands::Line_draw_command : public Draw_command {
-   public:
-    Line_draw_command(Line line, Color color) : line_(line), color_(color) {}
-
-    void execute(Renderer& renderer) const override {
-        renderer.draw_line(line_, color_);
-    }
-
-   private:
-    Line line_;
-    Color color_;
-};
-
-class Draw_commands::Rectangle_draw_command : public Draw_command {
-   public:
-    Rectangle_draw_command(Rectangle rect, Color color, Color_filling filling)
-        : rect_(rect), color_(color), filling_(filling) {}
-
-    void execute(Renderer& renderer) const override {
-        renderer.draw_rectangle(rect_, color_, filling_);
-    }
-
-   private:
-    Rectangle rect_;
-    Color color_;
-    Color_filling filling_;
-};
-
-void Draw_commands::add_image_draw_command(
-    Sdl::Texture& texture,
-    Sdl::Point position) {
-    draw_commands_.push_back(
-        std::make_unique<Image_draw_command>(texture, position));
-}
-
-void Draw_commands::add_line_draw_command(Sdl::Line line, Color color) {
-    draw_commands_.push_back(std::make_unique<Line_draw_command>(line, color));
-}
-
-void Draw_commands::add_rectangle_draw_command(
-    Rectangle rect,
-    Color color,
-    Sdl::Color_filling filling) {
-    draw_commands_.push_back(
-        std::make_unique<Rectangle_draw_command>(rect, color, filling));
-}
-
-void Draw_commands::execute(Sdl::Renderer& renderer) {
-    for (const auto& cmd : draw_commands_)
-        cmd->execute(renderer);
-    draw_commands_.clear();
 }
 
 Window::Window(const Window_properties& properties, Uint32 flags)
@@ -440,46 +366,66 @@ Window::Window(const Window_properties& properties, Uint32 flags)
 
 void Window::draw_image(const Filename& filename, Point position) {
     cache_image(filename);
-    draw_commands_.add_image_draw_command(
-        image_cache_.get_image_texture(filename), position);
+    
+    const auto draw_image_command = [this, filename, position] {
+        auto& texture = image_cache_.image_texture(filename);
+        renderer_.draw_texture(texture, position);
+    };
+    
+    draw_commands_.add_command(draw_image_command);
 }
 
 void Window::draw_line(Line line, Color color) {
-    draw_commands_.add_line_draw_command(line, color);
+    const auto draw_line_command = [this, line, color] {
+        renderer_.draw_line(line, color);
+    };
+    
+    draw_commands_.add_command(draw_line_command);
 }
 
 void Window::draw_rectangle(
     Rectangle rect,
     Color color,
     Color_filling filling) {
-    draw_commands_.add_rectangle_draw_command(rect, color, filling);
+    const auto draw_rectangle_command = [this, rect, color, filling] {
+        renderer_.draw_rectangle(rect, color, filling);
+    };
+    draw_commands_.add_command(draw_rectangle_command);
 }
 
 void Window::redraw(Color background_color) {
     renderer_.render_clear(background_color);
-    draw_commands_.execute(renderer_);
+    draw_commands_.execute();
     renderer_.render_present();
 }
 
-void Window::Deleter::operator()(SDL_Window* wnd) noexcept 
+void Window::Draw_commands::add_command(const Command& command)
 {
-    SDL_DestroyWindow(wnd);
+    draw_commands_.push_back(command);
+}
+
+void Window::Draw_commands::execute()
+{
+    for (const auto& draw_command : draw_commands_)
+        draw_command();
+    draw_commands_.clear();
 }
 
 void Window::cache_image(const Filename& filename) {
-    if (!image_cache_.image_loaded(filename))
-        image_cache_.load_image(filename, renderer_);
+    if (!image_cache_.image_is_cached(filename))
+        image_cache_.cache_image(filename, renderer_);
 }
 
-Window::Unique_window Window::create_checked_window(
+Unique_window Window::create_checked_window(
     const Window_properties& properties,
-    Uint32 flags) {
+    Uint32 flags) 
+{
     auto result = create_unchecked_window(properties, flags);
     internal::error_checking::check_pointer(result);
     return result;
 }
 
-Window::Unique_window Window::create_unchecked_window(
+Unique_window Window::create_unchecked_window(
     const Window_properties& properties,
     Uint32 flags) {
     return Unique_window(

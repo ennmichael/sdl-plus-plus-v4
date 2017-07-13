@@ -32,6 +32,27 @@ class Img_raii {
     Img_raii& operator=(Img_raii&&) = delete;
 };
 
+struct Texture_deleter {
+    void operator()(SDL_Texture*) const noexcept;
+};
+
+struct Surface_deleter {
+    void operator()(SDL_Surface*) const noexcept;
+};
+
+struct Renderer_deleter {
+    void operator()(SDL_Renderer*) const noexcept;
+};
+
+struct Window_deleter {
+    void operator()(SDL_Window*) const noexcept;
+};
+
+using Unique_renderer = std::unique_ptr<SDL_Renderer, Renderer_deleter>;
+using Unique_window = std::unique_ptr<SDL_Window, Window_deleter>;
+using Unique_surface = std::unique_ptr<SDL_Surface, Surface_deleter>;
+using Unique_texture = std::unique_ptr<SDL_Texture, Texture_deleter>;
+
 namespace internal {
 namespace error_checking {
 template <class PossiblySmartPointer>

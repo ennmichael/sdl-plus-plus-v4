@@ -141,39 +141,31 @@ std::ostream& operator<<(std::ostream&, Line);
 using Filename = std::string;
 
 class Texture {
-   public:
-    static Texture create_from_raw_surface(SDL_Renderer&, SDL_Surface&);
+public:
+    static Texture from_raw_surface(SDL_Renderer&, SDL_Surface&);
 
     Size size() const;
     void draw_to_raw_renderer(SDL_Renderer&, Point);
 
-   private:
+private:
     explicit Texture(SDL_Renderer&, SDL_Surface&);
 
     Rectangle create_source_rectangle() const noexcept;
     Rectangle create_destination_rectangle(Point) const noexcept;
-
-    struct Deleter {
-        void operator()(SDL_Texture*) noexcept;
-    };
-
-    std::unique_ptr<SDL_Texture, Deleter> texture_ptr_;
+    
+    Unique_texture texture_ptr_;
 };
 
 class Surface {
-   public:
+public:
     static Surface load_from_file(const Filename&);
 
     Texture get_texture_from_raw_renderer(SDL_Renderer&);
 
-   private:
+private:
     explicit Surface(const Filename&);
 
-    struct Deleter {
-        void operator()(SDL_Surface*) noexcept;
-    };
-
-    std::unique_ptr<SDL_Surface, Deleter> surface_ptr_;
+    Unique_surface surface_ptr_;
 };
 
 enum class Color_filling : bool { filled, none };
@@ -196,11 +188,8 @@ private:
     void draw_filled_rectangle(Rectangle);
     void draw_empty_rectangle(Rectangle);
     Color get_draw_color() const;
-
-    struct Deleter {
-        void operator()(SDL_Renderer*) noexcept;
-    };
-    std::unique_ptr<SDL_Renderer, Deleter> renderer_ptr_;
+    
+    Unique_renderer renderer_ptr_;
 };
 
 class Image_cache {
@@ -209,14 +198,14 @@ public:
         const char* what() const noexcept override;
     };
     
-    void load_image(const Filename&, Renderer&);
-    bool image_loaded(const Filename&) const noexcept;
-    Texture& get_image_texture(const Filename&);
-    const Texture& get_image_texture(const Filename&) const;
+    void cache_image(const Filename&, Renderer&);
+    bool image_is_cached(const Filename&) const noexcept;
+    Texture& image_texture(const Filename&);
+    const Texture& image_texture(const Filename&) const;
 
 private:
     template <class Self>
-    static auto& get_image_texture_fallback(Self& self, const Filename& filename) {
+    static auto& get_image_texture_impl(Self& self, const Filename& filename) {
         try {
             return self.textures_.at(filename);
         } catch(const std::out_of_range&) {
@@ -244,16 +233,23 @@ public:
     void draw_line(Line, Color);
     void draw_rectangle(Rectangle, Color, Color_filling);
 
-    void redraw(Color);
+    void redraw(Color); // How about no? Clear and draw should be split 
+                        // and redraw should be a convenience function
 
 private:
-    struct Deleter {
-        void operator()(SDL_Window*) noexcept;
+    class Draw_commands {
+    public:
+        using Command = std::function<void()>;
+        
+        void add_command(const Command&);
+        void execute();
+        
+    private:
+        std::vector<Command> draw_commands_;
     };
-
-    using Unique_window = std::unique_ptr<SDL_Window, Deleter>;
-    using Draw_command = std::function<void(Window&)>;
-
+    
+    using Draw_command = std::function<void()>;
+    
     void cache_image(const Filename&);
     void execute_draw_commands();
     static Unique_window create_checked_window(const Window_properties&, Uint32);
@@ -262,7 +258,7 @@ private:
     Image_cache image_cache_;
     Unique_window window_ptr_;
     Renderer renderer_;
-    std::vector<Draw_command> draw_commands_;
+    Draw_commands draw_commands_;
 };
 }
 

@@ -41,6 +41,8 @@ utility
 ../sdl-plus-plus-lib/include/sdl-plus-plus-v4/resource.h
 SDL2/SDL.h
 ../sdl-plus-plus-lib/include/sdl-plus-plus-v4/SDL2/SDL.h
+SDL2/SDL_image.h
+../sdl-plus-plus-lib/include/sdl-plus-plus-v4/SDL2/SDL_image.h
 memory
 -
 stdexcept
@@ -65,6 +67,4 @@ SDL2/SDL.h
 /home/haskellcurry/projects/sdl_plus_plus_v4/sdl-plus-plus-lib/src/resource.cpp
 resource.h
 /home/haskellcurry/projects/sdl_plus_plus_v4/sdl-plus-plus-lib/src/resource.h
-SDL2/SDL_image.h
-/home/haskellcurry/projects/sdl_plus_plus_v4/sdl-plus-plus-lib/src/SDL2/SDL_image.h
 

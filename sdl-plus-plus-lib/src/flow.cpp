@@ -16,7 +16,7 @@ Sdl::Point Mouse_motion_tracker::mouse_position() const noexcept {
 }
 
 const char* Timer::Invalid_delay::what() const noexcept {
-    return "The delay length is too large; must be less than "
+    return "The delay length is too large. Must be less than "
            "std::numeric_limits<Uint32>::max().";
 }
 
