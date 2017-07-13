@@ -1,0 +1,1 @@
+/usr/bin/c++   -g   CMakeFiles/example_exe.dir/src/main.cpp.o  -o example_exe -rdynamic ../sdl-plus-plus-lib/libsdl_plus_plus_lib.a -Wl,-Bstatic -lSDL2main -Wl,-Bdynamic -lSDL2 -lpthread -lSDL2_image 

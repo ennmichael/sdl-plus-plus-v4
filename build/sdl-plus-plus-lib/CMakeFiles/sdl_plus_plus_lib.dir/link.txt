@@ -1,0 +1,2 @@
+/usr/bin/ar qc libsdl_plus_plus_lib.a  CMakeFiles/sdl_plus_plus_lib.dir/src/drawing.cpp.o CMakeFiles/sdl_plus_plus_lib.dir/src/flow.cpp.o CMakeFiles/sdl_plus_plus_lib.dir/src/resource.cpp.o
+/usr/bin/ranlib libsdl_plus_plus_lib.a
