@@ -32,6 +32,13 @@ macro(add_boost)
     target_include_directories(sdl_plus_plus_lib PRIVATE ${Boost_INCLUDE_DIRS})
 endmacro()
 
+macro(add_flags)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
+        "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        target_compile_options (app PRIVATE -Wall -Wextra -pedantic -Werror -std=c++14)
+    endif()
+endmacro()
+
 add_own_includes()
 extend_module_path()
 

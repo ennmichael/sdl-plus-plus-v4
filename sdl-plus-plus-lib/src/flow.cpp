@@ -1,44 +1,109 @@
 #include "flow.h"
-#include "SDL2/SDL.h"
+#include "boost/optional.hpp"
+#include <utility>
 
 namespace Sdl {
-bool key_down(SDL_Scancode scancode) {
-    return SDL_GetKeyboardState(nullptr)[scancode] == 1;
+namespace Events {
+namespace internal {
+Event key_event(SDL_EventType event_type, SDL_Scancode scancode)
+{
+    return [event_type, scancode](const auto& raw_event)
+    {
+        return raw_event.type == event_type &&
+               raw_event.key.keysym.scancode == scancode;
+    };
+}
 }
 
-void Mouse_motion_tracker::update(const SDL_Event& e) noexcept {
-    if (e.type == SDL_MOUSEMOTION)
-        pos_ = {e.motion.x, e.motion.y};
+Event key_down(SDL_Scancode scancode)
+{
+    return internal::key_event(SDL_KEYDOWN, scancode);
 }
 
-Sdl::Point Mouse_motion_tracker::mouse_position() const noexcept {
-    return pos_;
+Event key_up(SDL_Scancode scancode)
+{
+    return internal::key_event(SDL_KEYUP, scancode);
 }
 
-const char* Timer::Invalid_delay::what() const noexcept {
-    return "The delay length is too large. Must be less than "
-           "std::numeric_limits<Uint32>::max().";
+Event mouse_click_inside_area(Rectangle area)
+{
+    return [area](const auto& raw_event)
+    {
+        if (raw_event.type == SDL_MOUSEBUTTONDOWN) {
+            const Point mousePosition = {raw_event.button.x, raw_event.button.y};
+            return mousePosition.is_inside_rectangle(area);
+        }
+        return false;
+    };
 }
 
-Timer::Timer(std::chrono::milliseconds delay) : delay_(delay) {
-    if (delay_too_large())
-        throw Invalid_delay();
+Event quit_requested()
+{
+    return [](const auto& raw_event)
+    {
+        return raw_event.type == SDL_QUIT;
+    };
+} // TODO Not DRY
+  // .type checks all over the place
 }
 
-bool Timer::ready() noexcept {
-    auto ticks = SDL_GetTicks();
-    if (ticks >= delay_.count() + current_) {
-        current_ = ticks;
-        return true;
+void Event_dispatcher::on_event(Event event, Action action)
+{
+    event_action_pairs_.push_back({std::move(event), std::move(action)});
+}
+
+void Event_dispatcher::dispatch()
+{
+    const auto poll_raw_event = []() -> boost::optional<SDL_Event>
+    {
+        SDL_Event result;
+        if (SDL_PollEvent(&result))
+            return result;
+        return boost::none;
+    };
+    
+    const auto dispatch_raw_event = [&](const SDL_Event& raw_event)
+    {
+        for (const auto& event_action_pair : event_action_pairs_)
+            if (event_action_pair.event(raw_event)) {
+                event_action_pair.action();
+            }
+    };
+    
+    while (const auto raw_event = poll_raw_event())
+        dispatch_raw_event(*raw_event);
+}
+
+const char* Main_loop::Already_running::what() const noexcept
+{
+    return "Trying to start an already running loop.";
+}
+
+const char* Main_loop::Already_stopped::what() const noexcept
+{
+    return "Trying to stop a loop that isn't running.";
+}
+
+void Main_loop::on_event(Event event, Action action)
+{
+    event_dispatcher_.on_event(event, action);
+}
+
+void Main_loop::start() noexcept
+{
+    is_running_ = true;
+    while (is_running_) {
+        event_dispatcher_.dispatch();
     }
-    return false;
 }
 
-bool Timer::delay_too_large() const noexcept {
-    return delay_.count() >= std::numeric_limits<Uint32>::max();
+void Main_loop::stop() noexcept 
+{
+    is_running_ = false;
 }
 
-std::chrono::milliseconds Timer::get_delay() const noexcept {
-    return std::chrono::milliseconds{delay_};
+bool Main_loop::is_running() const noexcept 
+{
+    return is_running_;
 }
 }

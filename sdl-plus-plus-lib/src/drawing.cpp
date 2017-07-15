@@ -45,6 +45,13 @@ Point& Point::operator/=(Point rhs) noexcept
     return *this;
 }
 
+bool Point::is_inside_rectangle(Rectangle rect) const
+{   
+    const auto rect_points = as_rectangle_points(rect);
+    return x > rect_points.upper_left.x && y > rect_points.lower_right.y &&
+           x < rect_points.lower_right.x && y <rect_points.lower_right.y;
+}
+
 std::ostream& operator<<(std::ostream& os, Point p) 
 {
     return os << "{x: " << p.x << ", y: " << p.y << '}';
@@ -94,13 +101,15 @@ std::ostream& operator<<(std::ostream& os, Size size)
 
 double distance_between_points(Point p1, Point p2) noexcept 
 {
-    auto difference = [](auto a, auto b) {
+    auto difference = [](auto a, auto b) 
+    {
         return std::abs(a - b);
     };
     
-    auto pythagorean_theoreme = [](auto a, auto b) {
+    auto pythagorean_theoreme = [](auto a, auto b) 
+    {
         return std::sqrt(a*a + b*b);
-    };
+    }; // Expose these please we should maybe have a header for math related stuff?
     
     return pythagorean_theoreme(difference(p1.x, p2.x), difference(p1.y, p2.y));
 }
@@ -120,15 +129,23 @@ Size rectangle_size(Rectangle_points points) noexcept
         points.lower_right.y - points.upper_left.y);
 }
 
-Rectangle make_rectangle(Rectangle_points rectangle_points) noexcept 
+Rectangle as_rectangle(Rectangle_points rectangle_points) noexcept 
 {
-    return make_rectangle(
+    return as_rectangle(
         rectangle_points.upper_left, rectangle_size(rectangle_points));
 }
 
-Rectangle make_rectangle(Point upper_left, Size size) noexcept 
+Rectangle as_rectangle(Point upper_left, Size size) noexcept 
 {
     return {upper_left.x, upper_left.y, size.width, size.height};
+}
+
+Rectangle_points as_rectangle_points(Rectangle rect) noexcept
+{
+    return {
+        {rect.x, rect.y},
+        {rect.x+rect.w, rect.y+rect.h}
+    };
 }
 
 Angle Angle::pi() noexcept 

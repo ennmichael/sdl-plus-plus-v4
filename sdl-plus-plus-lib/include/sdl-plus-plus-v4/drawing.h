@@ -37,6 +37,8 @@ struct Point : private Has_basic_operations<Point> {
     Point& operator-=(Point) noexcept;
     Point& operator*=(Point) noexcept;
     Point& operator/=(Point) noexcept;
+    
+    bool is_inside_rectangle(Rectangle) const;
 };
 
 std::ostream& operator<<(std::ostream&, Point);
@@ -106,8 +108,9 @@ struct Rectangle_points {
 };
 
 Size rectangle_size(Rectangle_points) noexcept;
-Rectangle make_rectangle(Rectangle_points) noexcept;
-Rectangle make_rectangle(Point, Size) noexcept;
+Rectangle as_rectangle(Rectangle_points) noexcept;
+Rectangle as_rectangle(Point, Size) noexcept;
+Rectangle_points as_rectangle_points(Rectangle) noexcept;
 
 class Angle {
 public:

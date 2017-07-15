@@ -35,7 +35,9 @@ chrono
 -
 stdexcept
 -
-utility
+functional
+-
+vector
 -
 
 ../sdl-plus-plus-lib/include/sdl-plus-plus-v4/resource.h
@@ -61,8 +63,10 @@ iostream
 /home/haskellcurry/projects/sdl_plus_plus_v4/sdl-plus-plus-lib/src/flow.cpp
 flow.h
 /home/haskellcurry/projects/sdl_plus_plus_v4/sdl-plus-plus-lib/src/flow.h
-SDL2/SDL.h
-/home/haskellcurry/projects/sdl_plus_plus_v4/sdl-plus-plus-lib/src/SDL2/SDL.h
+boost/optional.hpp
+/home/haskellcurry/projects/sdl_plus_plus_v4/sdl-plus-plus-lib/src/boost/optional.hpp
+utility
+-
 
 /home/haskellcurry/projects/sdl_plus_plus_v4/sdl-plus-plus-lib/src/resource.cpp
 resource.h

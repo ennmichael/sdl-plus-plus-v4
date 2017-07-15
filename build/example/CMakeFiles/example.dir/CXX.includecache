@@ -35,7 +35,9 @@ chrono
 -
 stdexcept
 -
-utility
+functional
+-
+vector
 -
 
 ../sdl-plus-plus-lib/include/sdl-plus-plus-v4/resource.h

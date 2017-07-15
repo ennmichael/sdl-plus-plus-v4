@@ -27,31 +27,19 @@ int main(int, char**) {
 
     auto props = Window_properties::default_values_with_title("Title");
     Window wnd(props);
-    Mouse_motion_tracker mouse_motion_tracker;
+    
+    Main_loop main_loop;
+    
+    main_loop.on_event(Events::quit_requested(), [&] {
+        main_loop.stop();
+    });
+    
+    const Line line = {
+        {0, 0},
+        {20, 20}
+    };
+    wnd.draw_line(line, Colors::red());
+    wnd.redraw(Colors::white());
 
-    auto event_loop = make_event_loop(
-        [&] {
-            wnd.draw_line(
-                Line(
-                    Point(props.size.width / 2, props.size.height / 2),
-                    mouse_motion_tracker.mouse_position()),
-                Colors::black());
-
-            Rectangle_points points;
-            points.lower_right = mouse_motion_tracker.mouse_position();
-            points.upper_left =
-                Point(props.size.width / 2, props.size.height / 2);
-
-            wnd.draw_rectangle(
-                make_rectangle(points), Colors::black(), Color_filling::none);
-            wnd.redraw(Colors::white());
-        },
-        [&](const SDL_Event& e) noexcept {
-            if (e.type == SDL_QUIT)
-                return Event_result::quit;
-            mouse_motion_tracker.update(e);
-            return Event_result::proceed;
-        });
-
-    event_loop.start();
+    main_loop.start();
 }
