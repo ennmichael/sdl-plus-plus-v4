@@ -1,8 +1,8 @@
 #pragma once
 
-#include "drawing.h"
-#include "internal/utils.h"
-#include <chrono> // TODO add the timer, or a timing event?
+#include "drawing.hpp"
+#include "internal/utils.hpp"
+#include <chrono> // TODO add a timer, or an Events::every(std::chrono::milliseconds)?
 #include <stdexcept>
 #include <functional>
 #include <vector>
@@ -26,7 +26,7 @@ Event window_state_changed();
 Event anything();
 Event quit_requested();
 
-// More various events
+// More various events to add
 };
 
 class Event_dispatcher {

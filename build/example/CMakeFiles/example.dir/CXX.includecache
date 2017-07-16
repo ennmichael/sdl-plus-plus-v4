@@ -6,15 +6,15 @@
 
 #IncludeRegexTransform: 
 
-../sdl-plus-plus-lib/include/internal/utils.h
+../sdl-plus-plus-lib/include/internal/utils.hpp
 utility
 -
 
-../sdl-plus-plus-lib/include/sdl-plus-plus-v4/drawing.h
+../sdl-plus-plus-lib/include/sdl-plus-plus-v4/drawing.hpp
 SDL2/SDL.h
 ../sdl-plus-plus-lib/include/sdl-plus-plus-v4/SDL2/SDL.h
-resource.h
-../sdl-plus-plus-lib/include/sdl-plus-plus-v4/resource.h
+resource.hpp
+../sdl-plus-plus-lib/include/sdl-plus-plus-v4/resource.hpp
 boost/operators.hpp
 ../sdl-plus-plus-lib/include/sdl-plus-plus-v4/boost/operators.hpp
 boost/functional/hash.hpp
@@ -32,11 +32,11 @@ functional
 cmath
 -
 
-../sdl-plus-plus-lib/include/sdl-plus-plus-v4/flow.h
-drawing.h
-../sdl-plus-plus-lib/include/sdl-plus-plus-v4/drawing.h
-internal/utils.h
-../sdl-plus-plus-lib/include/sdl-plus-plus-v4/internal/utils.h
+../sdl-plus-plus-lib/include/sdl-plus-plus-v4/flow.hpp
+drawing.hpp
+../sdl-plus-plus-lib/include/sdl-plus-plus-v4/drawing.hpp
+internal/utils.hpp
+../sdl-plus-plus-lib/include/sdl-plus-plus-v4/internal/utils.hpp
 chrono
 -
 stdexcept
@@ -46,7 +46,7 @@ functional
 vector
 -
 
-../sdl-plus-plus-lib/include/sdl-plus-plus-v4/resource.h
+../sdl-plus-plus-lib/include/sdl-plus-plus-v4/resource.hpp
 SDL2/SDL.h
 ../sdl-plus-plus-lib/include/sdl-plus-plus-v4/SDL2/SDL.h
 SDL2/SDL_image.h
@@ -56,13 +56,17 @@ memory
 stdexcept
 -
 
+../sdl-plus-plus-lib/include/sdl-plus-plus-v4/sdl-plus-plus.hpp
+sdl-plus-plus-v4/flow.hpp
+../sdl-plus-plus-lib/include/sdl-plus-plus-v4/sdl-plus-plus-v4/flow.hpp
+sdl-plus-plus-v4/resource.hpp
+../sdl-plus-plus-lib/include/sdl-plus-plus-v4/sdl-plus-plus-v4/resource.hpp
+sdl-plus-plus-v4/drawing.hpp
+../sdl-plus-plus-lib/include/sdl-plus-plus-v4/sdl-plus-plus-v4/drawing.hpp
+
 /home/haskellcurry/projects/sdl_plus_plus_v4/example/src/main.cpp
-sdl-plus-plus-v4/flow.h
-/home/haskellcurry/projects/sdl_plus_plus_v4/example/src/sdl-plus-plus-v4/flow.h
-sdl-plus-plus-v4/resource.h
-/home/haskellcurry/projects/sdl_plus_plus_v4/example/src/sdl-plus-plus-v4/resource.h
-sdl-plus-plus-v4/drawing.h
-/home/haskellcurry/projects/sdl_plus_plus_v4/example/src/sdl-plus-plus-v4/drawing.h
+sdl-plus-plus-v4/sdl-plus-plus.hpp
+/home/haskellcurry/projects/sdl_plus_plus_v4/example/src/sdl-plus-plus-v4/sdl-plus-plus.hpp
 iostream
 -
 

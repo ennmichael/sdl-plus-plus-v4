@@ -1,4 +1,4 @@
-#include "resource.h"
+#include "resource.hpp"
 
 namespace Sdl {
 const char* Sdl_exception::what() const noexcept 

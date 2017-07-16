@@ -1,6 +1,4 @@
-#include "sdl-plus-plus-v4/flow.h"
-#include "sdl-plus-plus-v4/resource.h"
-#include "sdl-plus-plus-v4/drawing.h"
+#include "sdl-plus-plus-v4/sdl-plus-plus.hpp"
 
 #include <iostream>
 

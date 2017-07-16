@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SDL2/SDL.h"
-#include "resource.h"
+#include "resource.hpp"
 #include "boost/operators.hpp"
 #include "boost/functional/hash.hpp"
 #include <string>
