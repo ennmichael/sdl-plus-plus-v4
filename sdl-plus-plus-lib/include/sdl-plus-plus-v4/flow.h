@@ -1,6 +1,7 @@
 #pragma once
 
 #include "drawing.h"
+#include "internal/utils.h"
 #include <chrono> // TODO add the timer, or a timing event?
 #include <stdexcept>
 #include <functional>
@@ -10,17 +11,20 @@ namespace Sdl {
 using Action = std::function<void()>;
 using Event = std::function<bool(const SDL_Event&)>;
 
-namespace Events {
 namespace internal {
+Event event_for_raw_type(SDL_EventType, const Event& = internal::utils::id(true));
 Event key_event(SDL_EventType, SDL_Scancode);
 }
+
+namespace Events {
+Event either(const std::vector<Event>&);
 
 Event key_down(SDL_Scancode);
 Event key_up(SDL_Scancode);
 Event mouse_click_inside_area(Rectangle);
+Event window_state_changed();
+Event anything();
 Event quit_requested();
-
-// A special eny event???
 
 // More various events
 };
@@ -28,7 +32,7 @@ Event quit_requested();
 class Event_dispatcher {
 public:
     void on_event(Event, Action);
-    void dispatch();
+    void dispatch() const;
     
 private:
     struct Event_action_pair {

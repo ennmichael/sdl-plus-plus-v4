@@ -76,6 +76,14 @@ struct Message_box {
 
 void show_message_box(const Message_box&);
 
+constexpr bool operator==(Color c1, Color c2)
+{
+    return c1.r == c2.r &&
+           c1.g == c2.g &&
+           c1.b == c2.b &&
+           c1.a == c2.a;
+}
+
 namespace Colors {
 constexpr Color red(Uint8 amount = 255, Uint8 alpha = 255) noexcept {
     return {amount, 0, 0, alpha};
@@ -236,8 +244,7 @@ public:
     void draw_line(Line, Color);
     void draw_rectangle(Rectangle, Color, Color_filling);
 
-    void redraw(Color); // How about no? Clear and draw should be split 
-                        // and redraw should be a convenience function
+    void refresh(Color);
 
 private:
     class Draw_commands {

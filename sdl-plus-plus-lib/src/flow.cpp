@@ -3,16 +3,34 @@
 #include <utility>
 
 namespace Sdl {
-namespace Events {
 namespace internal {
-Event key_event(SDL_EventType event_type, SDL_Scancode scancode)
+Event event_for_raw_type(SDL_EventType event_type, const Event& event)
 {
-    return [event_type, scancode](const auto& raw_event)
+    return [event_type, event](const auto& raw_event)
     {
-        return raw_event.type == event_type &&
-               raw_event.key.keysym.scancode == scancode;
+        if (raw_event.type == event_type)
+            return event(raw_event);
+        return false;
     };
 }
+
+Event key_event(SDL_EventType event_type, SDL_Scancode scancode)
+{
+    return internal::event_for_raw_type(event_type, [scancode](const auto& raw_event) {
+        return raw_event.key.keysym.scancode == scancode;
+    });
+}
+}
+
+namespace Events {
+Event either(const std::vector<Event>& events)
+{
+    return [events](const auto& raw_event)
+    {
+        return std::any_of(events.cbegin(), events.cend(), [&](const auto& event) {
+            return event(raw_event);
+        });
+    };
 }
 
 Event key_down(SDL_Scancode scancode)
@@ -27,24 +45,21 @@ Event key_up(SDL_Scancode scancode)
 
 Event mouse_click_inside_area(Rectangle area)
 {
-    return [area](const auto& raw_event)
-    {
-        if (raw_event.type == SDL_MOUSEBUTTONDOWN) {
-            const Point mousePosition = {raw_event.button.x, raw_event.button.y};
-            return mousePosition.is_inside_rectangle(area);
-        }
-        return false;
-    };
+    return internal::event_for_raw_type(SDL_MOUSEBUTTONDOWN, [area](const auto& raw_event) {
+        const Point mousePosition = {raw_event.button.x, raw_event.button.y};
+        return mousePosition.is_inside_rectangle(area);
+    });
+}
+
+Event window_state_changed()
+{
+    return internal::event_for_raw_type(SDL_WINDOWEVENT);
 }
 
 Event quit_requested()
 {
-    return [](const auto& raw_event)
-    {
-        return raw_event.type == SDL_QUIT;
-    };
-} // TODO Not DRY
-  // .type checks all over the place
+    return internal::event_for_raw_type(SDL_QUIT);
+}
 }
 
 void Event_dispatcher::on_event(Event event, Action action)
@@ -52,7 +67,7 @@ void Event_dispatcher::on_event(Event event, Action action)
     event_action_pairs_.push_back({std::move(event), std::move(action)});
 }
 
-void Event_dispatcher::dispatch()
+void Event_dispatcher::dispatch() const
 {
     const auto poll_raw_event = []() -> boost::optional<SDL_Event>
     {
@@ -65,9 +80,8 @@ void Event_dispatcher::dispatch()
     const auto dispatch_raw_event = [&](const SDL_Event& raw_event)
     {
         for (const auto& event_action_pair : event_action_pairs_)
-            if (event_action_pair.event(raw_event)) {
+            if (event_action_pair.event(raw_event))
                 event_action_pair.action();
-            }
     };
     
     while (const auto raw_event = poll_raw_event())

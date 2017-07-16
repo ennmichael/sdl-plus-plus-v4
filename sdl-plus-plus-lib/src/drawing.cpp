@@ -410,7 +410,7 @@ void Window::draw_rectangle(
     draw_commands_.add_command(draw_rectangle_command);
 }
 
-void Window::redraw(Color background_color) {
+void Window::refresh(Color background_color) {
     renderer_.render_clear(background_color);
     draw_commands_.execute();
     renderer_.render_present();
