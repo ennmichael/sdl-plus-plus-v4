@@ -1,8 +1,0 @@
-/home/haskellcurry/projects/sdl_plus_plus_v4/build/CMakeFiles/rebuild_cache.dir
-/home/haskellcurry/projects/sdl_plus_plus_v4/build/CMakeFiles/edit_cache.dir
-/home/haskellcurry/projects/sdl_plus_plus_v4/build/sdl-plus-plus-lib/CMakeFiles/rebuild_cache.dir
-/home/haskellcurry/projects/sdl_plus_plus_v4/build/sdl-plus-plus-lib/CMakeFiles/edit_cache.dir
-/home/haskellcurry/projects/sdl_plus_plus_v4/build/sdl-plus-plus-lib/CMakeFiles/sdl_plus_plus_lib.dir
-/home/haskellcurry/projects/sdl_plus_plus_v4/build/example/CMakeFiles/rebuild_cache.dir
-/home/haskellcurry/projects/sdl_plus_plus_v4/build/example/CMakeFiles/edit_cache.dir
-/home/haskellcurry/projects/sdl_plus_plus_v4/build/example/CMakeFiles/example.dir
